@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
-import { join } from "path";
+import { join, extname } from "path";
 import { ReadFileService } from "./read-file.service";
 import { ParseService } from "../../global-services/parse.service";
 
@@ -11,14 +11,14 @@ export class FileService {
 	) {}
 
 	async uploadFile(filePath: string): Promise<void> {
-		const fileExtension = filePath.split(".").pop();
+		const fileExtension = extname(filePath).replace(".", "");
 		const preparedFilePath = join(__dirname, "..", "..", "..", filePath);
 		try {
 			const preparedFileContent = await this.readFileService[fileExtension](preparedFilePath);
 			const parsed = this.parseService.parse(preparedFileContent);
 			console.log(parsed);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			throw new HttpException("Something went wrong while reading file", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
