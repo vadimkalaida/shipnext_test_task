@@ -29,6 +29,28 @@ export class ParseService {
 				}
 				if (
 					prevString &&
+					!prevString.value.includes("=") &&
+					!currentString.value.includes("=") &&
+					prevString.tabs < currentString.tabs &&
+					!res[prevString.value]
+				) {
+					console.log("prevstirng", prevString);
+					res[prevString.value] = [];
+				}
+				// if (
+				// 	(prevString &&
+				// 		!prevString.value.includes("=") &&
+				// 		!currentString.value.includes("=") &&
+				// 		prevString.tabs > currentString.tabs && !res[prevString.value]) ||
+				// 	(nextString &&
+				// 		!currentString.value.includes("=") &&
+				// 		!nextString.value.includes("=") &&
+				// 		nextString.tabs > currentString.tabs)
+				// ) {
+				// 	res[currentString.value] = [];
+				// }
+				if (
+					prevString &&
 					Array.isArray(res[prevString.value]) &&
 					nextString &&
 					nextString.value.includes("=") &&
@@ -51,20 +73,16 @@ export class ParseService {
 						),
 					});
 					console.log(stringsWithTabsCopy[i], "stringsWithTabsCopy[i]");
-					// if (foundNextItemWithThisTab && foundNextItemWithThisTab.value === currentString.value) {
-					// 	stringsWithTabsCopy = [
-					// 		stringsWithTabsCopy[i - 1],
-					// 		...stringsWithTabsCopy.slice(foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length),
-					// 	];
-					// } else {
-					// 	stringsWithTabsCopy = [
-					// 		...stringsWithTabsCopy.slice(foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length),
-					// 	];
-					// }
-					stringsWithTabsCopy = [
-						stringsWithTabsCopy[i - 1],
-						...stringsWithTabsCopy.slice(foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
-					];
+					if (foundNextItemWithThisTab && foundNextItemWithThisTab.value === currentString.value) {
+						stringsWithTabsCopy = [
+							stringsWithTabsCopy[i - 1],
+							...stringsWithTabsCopy.slice(foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
+						];
+					} else {
+						stringsWithTabsCopy = [
+							...stringsWithTabsCopy.slice(foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length),
+						];
+					}
 					// i = foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length - 1;
 					i = 0;
 					console.log(i, "i", "foundIndex", foundIndex);
