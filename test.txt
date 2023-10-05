@@ -54,3 +54,6 @@ countries
   country
     code = UKR
     name = Ukraine
+  country
+    code = US
+    name = The United States

@@ -92,8 +92,6 @@ export class ParseService {
 				tabs: numberOfTabs,
 			};
 		});
-		const prepared = this.prepareData(stringsWithNumberOfTabs);
-		console.log(prepared);
-		return prepared;
+		return this.prepareData(stringsWithNumberOfTabs);
 	}
 }
