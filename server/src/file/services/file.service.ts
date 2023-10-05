@@ -5,21 +5,11 @@ import { ParseService } from "../../global-services/parse.service";
 
 @Injectable()
 export class FileService {
-	constructor(
-		private readonly readFileService: ReadFileService,
-		private readonly parseService: ParseService
-	) {}
+	constructor(private readonly readFileService: ReadFileService) {}
 
-	async uploadFile(filePath: string): Promise<void> {
+	async uploadFile(filePath: string): Promise<string> {
 		const fileExtension = extname(filePath).replace(".", "");
 		const preparedFilePath = join(__dirname, "..", "..", "..", filePath);
-		try {
-			const preparedFileContent = await this.readFileService[fileExtension](preparedFilePath);
-			const parsed = this.parseService.parse(preparedFileContent);
-			console.log(parsed);
-		} catch (e) {
-			console.error(e);
-			throw new HttpException("Something went wrong while reading file", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return this.readFileService[fileExtension](preparedFilePath);
 	}
 }

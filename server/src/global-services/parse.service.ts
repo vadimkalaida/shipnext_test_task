@@ -94,13 +94,6 @@ export class ParseService {
 		});
 		const prepared = this.prepareData(stringsWithNumberOfTabs);
 		console.log(prepared);
-		console.log(prepared["exchange-offices"], "prepared[exchange-offices]");
-		console.log(prepared["exchange-offices"][0]?.exchanges, "prepared[exchange-offices][0].exchanges");
-		console.log(prepared["exchange-offices"][0]?.rates, "prepared[exchange-offices][0].rates");
-		console.log(prepared["exchange-offices"][1]?.exchanges, "prepared[exchange-offices][1].exchanges");
-		console.log(prepared["exchange-offices"][1]?.rates, "prepared[exchange-offices][1].rates");
-		console.log(prepared["exchange-offices"][2], "prepared[exchange-offices][2]");
-		console.log(prepared["exchange-offices"][2]?.rates, "prepared[exchange-offices][2].rates");
-		return stringsWithNumberOfTabs;
+		return prepared;
 	}
 }
