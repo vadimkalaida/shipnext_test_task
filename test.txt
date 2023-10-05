@@ -41,6 +41,15 @@ exchange-offices
         out = 2
         reserve = 150000
         date = 2023-04-24 22:55:33
+  exchange-office
+    id = 3
+    name = Exchanger 3
+    country = UKR
+    rates
+      rate
+        infos
+          info
+            name = Vadim
 countries
   country
     code = UKR

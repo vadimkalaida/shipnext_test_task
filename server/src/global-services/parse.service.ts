@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { TextService } from "./text.service";
 
 interface IStringWithNumberOfTabs {
 	value: string;
@@ -7,8 +8,32 @@ interface IStringWithNumberOfTabs {
 
 @Injectable()
 export class ParseService {
+	private readonly KEY_VALUE_DIVIDERS = ["=", ":"];
+
+	private returnResultWithArray(
+		res: Record<string, any>,
+		currentString: IStringWithNumberOfTabs,
+		prevString: IStringWithNumberOfTabs,
+		nextString: IStringWithNumberOfTabs
+	): Record<string, any> {
+		const resultCopy = { ...res };
+		const isNextStringContainsDivider = TextService.checkIfContainsOneOfSymbols(
+			nextString.value,
+			this.KEY_VALUE_DIVIDERS
+		);
+		if (
+			isNextStringContainsDivider &&
+			!TextService.checkIfContainsOneOfSymbols(prevString?.value || this.KEY_VALUE_DIVIDERS[0], this.KEY_VALUE_DIVIDERS)
+		) {
+			resultCopy[prevString.value] = [];
+		} else if (!isNextStringContainsDivider) {
+			resultCopy[currentString.value] = [];
+		}
+		return resultCopy;
+	}
+
 	prepareData(stringsWithTabs: IStringWithNumberOfTabs[], tabs: number = 0, customInitialIterationIndex: number = 0) {
-		const res: Record<string, any> = {};
+		let res: Record<string, any> = {};
 		let stringsWithTabsCopy = [...stringsWithTabs];
 		let i = customInitialIterationIndex || 0;
 		while (i < stringsWithTabsCopy.length) {
@@ -19,91 +44,60 @@ export class ParseService {
 			console.log(currentString, "currentString", i);
 			console.log(nextString, "nextString", i + 1);
 			if (currentString && currentString.tabs >= tabs) {
-				if (
-					nextString &&
-					!currentString.value.includes("=") &&
-					!nextString.value.includes("=") &&
-					nextString.tabs > currentString.tabs &&
-					(!prevString || (prevString && !Array.isArray(res[prevString.value])))
-				) {
-					console.log("creating error currentstring value", currentString.value);
-					res[currentString.value] = [];
+				const isCurrenStringContainsDivider = TextService.checkIfContainsOneOfSymbols(
+					currentString.value,
+					this.KEY_VALUE_DIVIDERS
+				);
+				if (!isCurrenStringContainsDivider && nextString && !Array.isArray(res[prevString?.value])) {
+					res = this.returnResultWithArray(res, currentString, prevString, nextString);
 				}
-				if (
-					prevString &&
-					!prevString.value.includes("=") &&
-					!currentString.value.includes("=") &&
-					prevString.tabs < currentString.tabs &&
-					!res[prevString.value] &&
-					(!nextString || (nextString && nextString.value.includes("=")))
-				) {
-					console.log("creating error prevstring value", prevString.value);
-					res[prevString.value] = [];
-				}
-				if (
-					prevString &&
-					Array.isArray(res[prevString.value]) &&
-					((nextString && !nextString.value.includes("=")) || !nextString) &&
-					!currentString.value.includes("=")
-				) {
-					console.log("pushing to array", currentString.value);
+				// if (
+				// 	nextString &&
+				// 	!currentString.value.includes("=") &&
+				// 	!nextString.value.includes("=") &&
+				// 	nextString.tabs > currentString.tabs &&
+				// 	(!prevString || (prevString && !Array.isArray(res[prevString.value])))
+				// ) {
+				// 	console.log("arr currentstring", currentString.value, i);
+				// 	res[currentString.value] = [];
+				// }
+				// if (
+				// 	prevString &&
+				// 	!prevString.value.includes("=") &&
+				// 	!currentString.value.includes("=") &&
+				// 	prevString.tabs < currentString.tabs &&
+				// 	!res[prevString.value] &&
+				// 	(!nextString || (nextString && nextString.value.includes("=")))
+				// ) {
+				// 	console.log("arr prevString", prevString.value, i);
+				// 	res[prevString.value] = [];
+				// }
+				if (prevString && Array.isArray(res[prevString.value]) && !isCurrenStringContainsDivider) {
 					const foundNextItemWithThisTab = stringsWithTabsCopy
 						.slice(i + 1)
 						.find((item) => item.tabs === currentString.tabs);
-					console.log(foundNextItemWithThisTab, "foundNextItemWithThisTab");
 					const foundIndex = foundNextItemWithThisTab ? stringsWithTabsCopy.indexOf(foundNextItemWithThisTab) : -1;
 					res[prevString.value].push(
 						this.prepareData(
-							stringsWithTabsCopy.slice(i || 0, foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
+							stringsWithTabsCopy.slice(i, foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
 							currentString.tabs,
 							1
 						)
 					);
-					stringsWithTabsCopy = [
-						...stringsWithTabsCopy.slice(foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
-					];
-					console.log(stringsWithTabsCopy, "stringsWithTabsCopy pushing to aray");
-					i = 0;
-				}
-				if (
-					prevString &&
-					Array.isArray(res[prevString.value]) &&
-					nextString &&
-					nextString.value.includes("=") &&
-					!currentString.value.includes("=")
-				) {
-					const foundNextItemWithThisTab = stringsWithTabsCopy
-						.slice(i + 1)
-						.find((item) => item.tabs === currentString.tabs);
-					console.log(foundNextItemWithThisTab, "foundNextItemWithThisTab");
-					const foundIndex = foundNextItemWithThisTab ? stringsWithTabsCopy.indexOf(foundNextItemWithThisTab) : -1;
-					res[prevString.value].push(
-						this.prepareData(
-							stringsWithTabsCopy.slice(i || 0, foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
-							currentString.tabs,
-							1
-						)
-					);
-					console.log(stringsWithTabsCopy[i], "stringsWithTabsCopy[i]");
 					if (foundNextItemWithThisTab && foundNextItemWithThisTab.value === currentString.value) {
-						stringsWithTabsCopy = [
-							stringsWithTabsCopy[i - 1],
-							...stringsWithTabsCopy.slice(foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
-						];
+						stringsWithTabsCopy = [stringsWithTabsCopy[i - 1], ...stringsWithTabsCopy.slice(foundIndex)];
 					} else {
-						stringsWithTabsCopy = [
-							...stringsWithTabsCopy.slice(foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length),
-						];
+						stringsWithTabsCopy = stringsWithTabsCopy.slice(
+							foundIndex > 0 ? foundIndex - 1 : stringsWithTabsCopy.length
+						);
 					}
 					i = 0;
-					console.log(i, "i", "foundIndex", foundIndex);
 				}
-				if (currentString.value.includes("=")) {
-					const splitValueArr = currentString.value.split("=");
+				if (isCurrenStringContainsDivider) {
+					const splitValueArr = TextService.splitTextByOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
 					res[splitValueArr[0].trim()] = splitValueArr[1].trim();
 				}
 			} else {
-				console.log(currentString, "currentString foundSmallerTab");
 				break;
 			}
 			i += 1;
