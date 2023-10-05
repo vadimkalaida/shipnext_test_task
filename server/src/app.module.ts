@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { FileModule } from "./file/file.module";
+import { join } from "path";
+import { FileModule } from "./modules/file/file.module";
 
 @Module({
 	imports: [
@@ -18,9 +19,9 @@ import { FileModule } from "./file/file.module";
 				port: configService.get("DB_PORT"),
 				username: configService.get("DB_USERNAME"),
 				password: configService.get("DB_PASSWORD"),
-				database: configService.get("DB_DATABASE"),
+				database: configService.get("DB_NAME"),
 				synchronize: true,
-				entities: [__dirname, "/**/*.entity{.ts,.js}"],
+				entities: [join(__dirname, "**", "*.entity.{ts,js}")],
 			}),
 			inject: [ConfigService],
 		}),
