@@ -1,7 +1,6 @@
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { join, extname } from "path";
 import { ReadFileService } from "./read-file.service";
-import { ParseService } from "../../global-services/parse.service";
 
 @Injectable()
 export class FileService {
