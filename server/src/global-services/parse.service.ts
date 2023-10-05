@@ -40,9 +40,6 @@ export class ParseService {
 			const prevString = stringsWithTabsCopy[i - 1];
 			const currentString = stringsWithTabsCopy[i];
 			const nextString = stringsWithTabsCopy[i + 1];
-			console.log(prevString, "prevString", i - 1);
-			console.log(currentString, "currentString", i);
-			console.log(nextString, "nextString", i + 1);
 			if (currentString && currentString.tabs >= tabs) {
 				const isCurrenStringContainsDivider = TextService.checkIfContainsOneOfSymbols(
 					currentString.value,
@@ -51,32 +48,13 @@ export class ParseService {
 				if (!isCurrenStringContainsDivider && nextString && !Array.isArray(res[prevString?.value])) {
 					res = this.returnResultWithArray(res, currentString, prevString, nextString);
 				}
-				// if (
-				// 	nextString &&
-				// 	!currentString.value.includes("=") &&
-				// 	!nextString.value.includes("=") &&
-				// 	nextString.tabs > currentString.tabs &&
-				// 	(!prevString || (prevString && !Array.isArray(res[prevString.value])))
-				// ) {
-				// 	console.log("arr currentstring", currentString.value, i);
-				// 	res[currentString.value] = [];
-				// }
-				// if (
-				// 	prevString &&
-				// 	!prevString.value.includes("=") &&
-				// 	!currentString.value.includes("=") &&
-				// 	prevString.tabs < currentString.tabs &&
-				// 	!res[prevString.value] &&
-				// 	(!nextString || (nextString && nextString.value.includes("=")))
-				// ) {
-				// 	console.log("arr prevString", prevString.value, i);
-				// 	res[prevString.value] = [];
-				// }
 				if (prevString && Array.isArray(res[prevString.value]) && !isCurrenStringContainsDivider) {
-					const foundNextItemWithThisTab = stringsWithTabsCopy
+					const foundNextItemWithThisTabNumber = stringsWithTabsCopy
 						.slice(i + 1)
 						.find((item) => item.tabs === currentString.tabs);
-					const foundIndex = foundNextItemWithThisTab ? stringsWithTabsCopy.indexOf(foundNextItemWithThisTab) : -1;
+					const foundIndex = foundNextItemWithThisTabNumber
+						? stringsWithTabsCopy.indexOf(foundNextItemWithThisTabNumber)
+						: -1;
 					res[prevString.value].push(
 						this.prepareData(
 							stringsWithTabsCopy.slice(i, foundIndex >= 0 ? foundIndex : stringsWithTabsCopy.length),
@@ -84,7 +62,7 @@ export class ParseService {
 							1
 						)
 					);
-					if (foundNextItemWithThisTab && foundNextItemWithThisTab.value === currentString.value) {
+					if (foundNextItemWithThisTabNumber && foundNextItemWithThisTabNumber.value === currentString.value) {
 						stringsWithTabsCopy = [stringsWithTabsCopy[i - 1], ...stringsWithTabsCopy.slice(foundIndex)];
 					} else {
 						stringsWithTabsCopy = stringsWithTabsCopy.slice(
