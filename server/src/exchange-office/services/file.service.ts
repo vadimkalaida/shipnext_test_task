@@ -8,7 +8,7 @@ export class FileService {
 
 	async uploadFile(filePath: string): Promise<string> {
 		const fileExtension = extname(filePath).replace(".", "");
-		const preparedFilePath = join(__dirname, "..", "..", "..", "..", filePath);
+		const preparedFilePath = join(__dirname, "..", "..", "..", filePath);
 		return this.readFileService[fileExtension](preparedFilePath);
 	}
 }

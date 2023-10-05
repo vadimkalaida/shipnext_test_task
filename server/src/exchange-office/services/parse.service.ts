@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { TextService } from "./text.service";
+import { TextService } from "../../global-services/text.service";
 
 interface IStringWithNumberOfTabs {
 	value: string;

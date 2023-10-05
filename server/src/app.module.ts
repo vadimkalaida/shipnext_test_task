@@ -2,11 +2,11 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
-import { FileModule } from "./modules/file/file.module";
+import { ExchangeOfficeModule } from "./exchange-office/exchange-office.module";
 
 @Module({
 	imports: [
-		FileModule,
+		ExchangeOfficeModule,
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: `.env.${process.env.NODE_ENV}`,

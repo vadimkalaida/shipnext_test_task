@@ -1,18 +1,20 @@
-import { Controller, Post, UploadedFile, UseInterceptors, HttpException, HttpStatus } from "@nestjs/common";
+import { Controller, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Express } from "express";
+import { ExchangeOfficeService } from "./exchange-office.service";
 import { FileService } from "./services/file.service";
+import { ParseService } from "./services/parse.service";
 import { fileMulterConfig } from "./configs/multer.config";
-import { ParseService } from "../../global-services/parse.service";
 
-@Controller("file")
-export class FileController {
+@Controller("exchange-office")
+export class ExchangeOfficeController {
 	constructor(
+		private readonly exchangeOfficeService: ExchangeOfficeService,
 		private readonly fileService: FileService,
 		private readonly parseService: ParseService
 	) {}
 
-	@Post("upload")
+	@Post("upload-file")
 	@UseInterceptors(FileInterceptor("file", fileMulterConfig))
 	async uploadFile(@UploadedFile() file: Express.Multer.File) {
 		try {
