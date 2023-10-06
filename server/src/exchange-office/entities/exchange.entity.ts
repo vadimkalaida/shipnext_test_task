@@ -12,15 +12,15 @@ export class Exchange {
 	@Column()
 	to: string;
 
-	@Column()
-	ask: number;
+	@Column({ type: "real" })
+	ask: string;
 
-	@Column({ nullable: true })
-	bid: number;
+	@Column({ nullable: true, type: "real" })
+	bid: string;
 
 	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
 	date: Date;
 
-	@ManyToOne(() => ExchangeOffice, (exchangeOffice) => exchangeOffice.exchanges)
+	@ManyToOne(() => ExchangeOffice, (exchangeOffice) => exchangeOffice.exchanges, { cascade: true })
 	exchangeOffice: ExchangeOffice;
 }

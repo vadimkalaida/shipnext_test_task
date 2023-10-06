@@ -12,18 +12,18 @@ export class Rate {
 	@Column()
 	to: string;
 
-	@Column()
-	in: number;
+	@Column({ type: "real" })
+	in: string;
 
-	@Column()
-	out: number;
+	@Column({ type: "real" })
+	out: string;
 
-	@Column()
-	reserve: number;
+	@Column({ type: "real" })
+	reserve: string;
 
 	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
 	date: Date;
 
-	@ManyToOne(() => ExchangeOffice, (exchangeOffice) => exchangeOffice.rates)
+	@ManyToOne(() => ExchangeOffice, (exchangeOffice) => exchangeOffice.rates, { cascade: true })
 	exchangeOffice: ExchangeOffice;
 }

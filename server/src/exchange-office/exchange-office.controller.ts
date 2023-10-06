@@ -22,8 +22,6 @@ export class ExchangeOfficeController {
 			const parsed = this.parseService.parse(preparedFileString);
 			await this.exchangeOfficeService.saveDataToDB(parsed);
 			console.log(parsed, "parsed");
-			// console.log(parsed["exchange-offices"][0].exchanges, "parsed[0].exchanges");
-			// console.log(parsed["exchange-offices"][0].rates, "parsed[0].rates");
 		} catch (e) {
 			console.error(e);
 			throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
