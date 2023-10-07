@@ -52,6 +52,7 @@ export class ExchangeOfficeService {
 				where: {
 					id: In(parsedExchangeOfficeIds),
 				},
+				relations: ["country"],
 			});
 			return exchangeOfficesFromDB.reduce((arr, exchangeOfficeFromDB) => {
 				const foundParsedExchangeOffice = parsedExchangeOffices.find(
@@ -63,7 +64,7 @@ export class ExchangeOfficeService {
 					...arr,
 					...foundParsedExchangeOffice[fieldName].map((dataItem: { [key: string]: any }) => ({
 						...dataItem,
-						exchangeOfficeFromDB,
+						exchangeOffice: exchangeOfficeFromDB,
 					})),
 				];
 			}, []);
