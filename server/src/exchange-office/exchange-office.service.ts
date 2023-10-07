@@ -15,7 +15,7 @@ export class ExchangeOfficeService {
 		@InjectRepository(Country) private readonly countryRepository: Repository<Country>
 	) {}
 
-	async saveDataByFieldToDB(
+	async saveUniqueDataByField(
 		data: NonNullable<unknown>[],
 		repositoryName: string,
 		fieldName: string,
@@ -30,13 +30,13 @@ export class ExchangeOfficeService {
 			});
 			const existingFields = existingDataItems.map((item: { [key: string]: any }) => item[fieldName]);
 			const filteredData = data.filter((item: { [key: string]: any }) => {
-				if (item[fieldName]) {
+				if (item[fieldName] !== undefined) {
 					const isNum = isNumCheck ? Number.isFinite(+item[fieldName]) : false;
 					return !existingFields.includes(isNum ? +item[fieldName] : item[fieldName]);
 				}
 				return false;
 			});
-			await this.saveDataToDb(filteredData, repositoryName);
+			await this.saveEntity(filteredData, repositoryName);
 		}
 	}
 
@@ -72,7 +72,7 @@ export class ExchangeOfficeService {
 		return [];
 	}
 
-	async saveDataToDb(data: NonNullable<unknown>[], repositoryName: string): Promise<void> {
+	async saveEntity(data: NonNullable<unknown>[], repositoryName: string): Promise<void> {
 		if (data.length) {
 			const dataEntities = this[repositoryName].create(data);
 			await this[repositoryName].save(dataEntities);
@@ -84,13 +84,13 @@ export class ExchangeOfficeService {
 		const { countries } = data as {
 			countries: Country[];
 		};
-		await this.saveDataByFieldToDB(countries, "countryRepository", "code");
-		await this.saveDataByFieldToDB(exchangeOffices, "exchangeOfficeRepository", "id", true);
+		await this.saveUniqueDataByField(countries, "countryRepository", "code");
+		await this.saveUniqueDataByField(exchangeOffices, "exchangeOfficeRepository", "id", true);
 		const [exchanges, rates] = await Promise.all(
 			["exchanges", "rates"].map((fieldName) => this.prepareDataWithExchangeOfficeId(exchangeOffices, fieldName))
 		);
 		await Promise.all(
-			[exchanges, rates].map((item, index) => this.saveDataToDb(item, ["exchangeRepository", "rateRepository"][index]))
+			[exchanges, rates].map((item, index) => this.saveEntity(item, ["exchangeRepository", "rateRepository"][index]))
 		);
 	}
 }
