@@ -40,31 +40,30 @@ export class ExchangeOfficeService {
 		}
 	}
 
-	async prepareDataWithExchangeOfficeId(
-		exchangeOffices: ExchangeOffice[],
+	async prepareDataWithExchangeOffice(
+		parsedExchangeOffices: ExchangeOffice[],
 		fieldName: string
 	): Promise<NonNullable<unknown>[]> {
-		const exchangeOfficeIds = exchangeOffices
-			.filter((exchangeOffice) => exchangeOffice[fieldName])
-			.map((exchangeOfficeItem) => exchangeOfficeItem.id);
-		if (exchangeOfficeIds.length) {
-			const foundExchangeOffices = await this.exchangeOfficeRepository.find({
+		const parsedExchangeOfficeIds = parsedExchangeOffices
+			.filter((parsedExchangeOffice) => parsedExchangeOffice[fieldName])
+			.map((parsedExchangeOffice) => parsedExchangeOffice.id);
+		if (parsedExchangeOfficeIds.length) {
+			const exchangeOfficesFromDB = await this.exchangeOfficeRepository.find({
 				where: {
-					id: In(exchangeOfficeIds),
+					id: In(parsedExchangeOfficeIds),
 				},
 			});
-			return foundExchangeOffices.reduce((arr, exchangeOffice) => {
-				const foundExchangeOfficeWithThisField = exchangeOffices.find(
-					(foundExchangeOfficeItem) =>
-						(Number.isFinite(+foundExchangeOfficeItem.id)
-							? +foundExchangeOfficeItem.id
-							: foundExchangeOfficeItem.id) === exchangeOffice.id
+			return exchangeOfficesFromDB.reduce((arr, exchangeOfficeFromDB) => {
+				const foundParsedExchangeOffice = parsedExchangeOffices.find(
+					(parsedExchangeOffice) =>
+						(Number.isFinite(+parsedExchangeOffice.id) ? +parsedExchangeOffice.id : parsedExchangeOffice.id) ===
+						exchangeOfficeFromDB.id
 				);
 				return [
 					...arr,
-					...foundExchangeOfficeWithThisField[fieldName].map((dataItem: { [key: string]: any }) => ({
+					...foundParsedExchangeOffice[fieldName].map((dataItem: { [key: string]: any }) => ({
 						...dataItem,
-						exchangeOffice,
+						exchangeOfficeFromDB,
 					})),
 				];
 			}, []);
@@ -87,7 +86,7 @@ export class ExchangeOfficeService {
 		await this.saveUniqueDataByField(countries, "countryRepository", "code");
 		await this.saveUniqueDataByField(exchangeOffices, "exchangeOfficeRepository", "id", true);
 		const [exchanges, rates] = await Promise.all(
-			["exchanges", "rates"].map((fieldName) => this.prepareDataWithExchangeOfficeId(exchangeOffices, fieldName))
+			["exchanges", "rates"].map((fieldName) => this.prepareDataWithExchangeOffice(exchangeOffices, fieldName))
 		);
 		await Promise.all(
 			[exchanges, rates].map((item, index) => this.saveEntity(item, ["exchangeRepository", "rateRepository"][index]))
