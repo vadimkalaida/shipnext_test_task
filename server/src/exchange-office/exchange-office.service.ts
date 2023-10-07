@@ -76,13 +76,15 @@ export class ExchangeOfficeService {
 		}
 	}
 
-	async findCorrespondingRateAndSaveExchange(exchanges: Exchange[]): Promise<void> {
-		const rates = await this.rateRepository.find({
-			where: {
-				from: In(exchanges.map((exchange) => exchange.from)),
-				to: In(exchanges.map((exchange) => exchange.to)),
-			},
-		});
+	async findCorrespondingRateAndSaveExchange(exchanges: Exchange[], alreadyPreparedRates: Rate[] = []): Promise<void> {
+		const rates = !alreadyPreparedRates.length
+			? await this.rateRepository.find({
+					where: {
+						from: In(exchanges.map((exchange) => exchange.from)),
+						to: In(exchanges.map((exchange) => exchange.to)),
+					},
+			  })
+			: alreadyPreparedRates;
 		if (rates.length) {
 			const exchangesWithRate = exchanges.map((exchange) => {
 				const currentDate = new Date(exchange.date).getTime();
