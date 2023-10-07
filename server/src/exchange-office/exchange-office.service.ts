@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, In } from "typeorm";
+import { Repository, In, MoreThanOrEqual } from "typeorm";
 import { ExchangeOffice } from "./entities/exchange-office.entity";
 import { Exchange } from "./entities/exchange.entity";
 import { Rate } from "./entities/rate.entity";
@@ -76,27 +76,46 @@ export class ExchangeOfficeService {
 		}
 	}
 
+	getUSDCurrency(rateFromVal: string, rates: Rate[]): number {
+		const usdRate = rates.find((rate) => rate.from === rateFromVal && rate.to === "USD");
+		if (usdRate) {
+			return +usdRate.out / +usdRate.in;
+		}
+		return 0;
+	}
+
 	async findCorrespondingRateAndSaveExchange(exchanges: Exchange[], alreadyPreparedRates: Rate[] = []): Promise<void> {
+		const monthAgo = new Date();
+		monthAgo.setMonth(monthAgo.getMonth() - 1);
 		const rates = !alreadyPreparedRates.length
 			? await this.rateRepository.find({
 					where: {
-						from: In(exchanges.map((exchange) => exchange.from)),
-						to: In(exchanges.map((exchange) => exchange.to)),
+						date: MoreThanOrEqual(monthAgo),
 					},
 			  })
 			: alreadyPreparedRates;
 		if (rates.length) {
+			const sortedRates = rates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 			const exchangesWithRate = exchanges.map((exchange) => {
-				const currentDate = new Date(exchange.date).getTime();
-				const preparedRates = rates.filter(
-					(rateItem) => rateItem.from === exchange.from && rateItem.to === exchange.to
-				);
+				const currentExchangeDate = new Date(exchange.date).getTime();
+				const preparedRates = sortedRates
+					.filter((rateItem) => rateItem.from === exchange.from && rateItem.to === exchange.to)
+					.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 				if (preparedRates.length) {
 					const closestRate = preparedRates.reduce((closest, currentItem) => {
-						const timeDifference = Math.abs(new Date(currentItem.date).getTime() - currentDate);
-						return timeDifference < Math.abs(new Date(closest.date).getTime() - currentDate) ? currentItem : closest;
+						const timeDifference = Math.abs(new Date(currentItem.date).getTime() - currentExchangeDate);
+						return timeDifference < Math.abs(new Date(closest.date).getTime() - currentExchangeDate)
+							? currentItem
+							: closest;
 					}, preparedRates[0]);
+					const usdCurrency = this.getUSDCurrency(exchange.to !== "USD" ? exchange.to : exchange.from, sortedRates);
 					const calculatedBid: number = +exchange.bid || +exchange.ask / (+closestRate.out / +closestRate.in);
+					const preparedAsk = closestRate.from === "USD" ? +exchange.ask * usdCurrency : +exchange.ask;
+					const preparedBid = closestRate.from === "USD" ? calculatedBid : calculatedBid * usdCurrency;
+					console.log(exchange, "current exchange");
+					console.log(usdCurrency, "usdCurrency");
+					console.log(preparedAsk, "preparedAsk", exchange.ask, "exchange.ask");
+					console.log(preparedBid, "preparedBid", calculatedBid, "calculatedBid");
 					return {
 						...exchange,
 						bid: calculatedBid,
@@ -125,5 +144,22 @@ export class ExchangeOfficeService {
 		]);
 		await this.saveEntity(preparedRates, "rateRepository");
 		await this.findCorrespondingRateAndSaveExchange(preparedExchanges);
+	}
+
+	async getTopCurrencyExchangers() {
+		const currentDate = new Date();
+		currentDate.setMonth(currentDate.getMonth() - 1);
+		const foundExchangeOfficesForTheLastMonth = await this.exchangeOfficeRepository.find({
+			relations: ["exchanges", "rates", "country"],
+			where: {
+				exchanges: {
+					date: MoreThanOrEqual(currentDate),
+				},
+				rates: {
+					date: MoreThanOrEqual(currentDate),
+				},
+			},
+		});
+		console.log(foundExchangeOfficesForTheLastMonth, "foundExchangeOfficesForTheLastMonth");
 	}
 }

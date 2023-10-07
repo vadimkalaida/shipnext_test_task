@@ -8,39 +8,84 @@ exchange-offices
         from = EUR
         to = USD
         ask = 110
-        date = 2023-04-24 22:55:33
+        date = 2023-10-04 22:55:33
       exchange
         from = USD
         to = UAH
         ask = 400
-        date = 2023-04-24 22:55:33
+        date = 2023-10-04 22:55:33
     rates
+      rate
+        from = USD
+        to = EUR
+        in = 1
+        out = 1.03
+        reserve = 130000
+        date = 2023-10-04 22:55:33
       rate
         from = EUR
         to = USD
         in = 1.1
         out = 1
         reserve = 120000
-        date = 2023-04-24 22:55:33
+        date = 2023-10-04 22:55:33
       rate
         from = USD
         to = UAH
         in = 1
         out = 40
         reserve = 150000
-        date = 2023-04-24 22:55:33
+        date = 2023-10-04 22:55:33
+      rate
+        from = UAH
+        to = USD
+        in = 41.2
+        out = 1
+        reserve = 100000
+        date = 2023-10-04 22:55:33
   exchange-office
     id = 2
     name = Exchanger 2
-    country = UKR
+    country = US
+    exchanges
+      exchange
+        from = EUR
+        to = USD
+        ask = 110
+        date = 2023-10-03 21:55:33
     rates
+      rate
+        from = EUR
+        to = USD
+        in = 1.07
+        out = 1
+        reserve = 150000
+        date = 2023-10-03 21:55:33
       rate
         from = AUD
         to = CAD
         in = 1
         out = 2
         reserve = 150000
-        date = 2023-04-24 22:55:33
+        date = 2023-10-03 21:55:33
+  exchange-office
+    id = 3
+    name = Exchanger 3
+    country = GBR
+    exchanges
+      exchange
+        from = EUR
+        to = USD
+        ask = 50
+        date = 2023-10-02 20:35:16
+    rates
+      rate
+        from = EUR
+        to = USD
+        in = 1.12
+        out = 1
+        reserve = 150000
+        date = 2023-10-02 20:35:16
 countries
   country
     code = UKR
@@ -48,3 +93,6 @@ countries
   country
     code = US
     name = The United States
+  country
+    code = GBR
+    name = Great Britain

@@ -1,4 +1,4 @@
-import { Controller, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import {Controller, Get, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Express } from "express";
 import { ExchangeOfficeService } from "./exchange-office.service";
@@ -22,6 +22,16 @@ export class ExchangeOfficeController {
 			const parsed = this.parseService.parse(preparedFileString);
 			await this.exchangeOfficeService.saveDataToDB(parsed);
 			console.log(parsed, "parsed");
+		} catch (e) {
+			console.error(e);
+			throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Get("top-currency-exchangers")
+	async getTop3CurrencyExchangers() {
+		try {
+			await this.exchangeOfficeService.getTopCurrencyExchangers();
 		} catch (e) {
 			console.error(e);
 			throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
