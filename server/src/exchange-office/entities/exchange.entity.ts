@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { ExchangeOffice } from "./exchange-office.entity";
+import { Rate } from "./rate.entity";
 
 @Entity()
 export class Exchange {
@@ -23,4 +24,8 @@ export class Exchange {
 
 	@ManyToOne(() => ExchangeOffice, (exchangeOffice) => exchangeOffice.exchanges, { cascade: true })
 	exchangeOffice: ExchangeOffice;
+
+	@ManyToOne(() => Rate)
+	@JoinColumn({ name: "rateId" })
+	rate: Rate;
 }

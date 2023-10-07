@@ -40,10 +40,7 @@ export class ExchangeOfficeService {
 		}
 	}
 
-	async prepareDataWithExchangeOffice(
-		parsedExchangeOffices: ExchangeOffice[],
-		fieldName: string
-	): Promise<NonNullable<unknown>[]> {
+	async prepareDataWithExchangeOffice<T>(parsedExchangeOffices: ExchangeOffice[], fieldName: string): Promise<T[]> {
 		const parsedExchangeOfficeIds = parsedExchangeOffices
 			.filter((parsedExchangeOffice) => parsedExchangeOffice[fieldName])
 			.map((parsedExchangeOffice) => parsedExchangeOffice.id);
@@ -79,6 +76,38 @@ export class ExchangeOfficeService {
 		}
 	}
 
+	async findCorrespondingRateAndSaveExchange(exchanges: Exchange[]): Promise<void> {
+		const rates = await this.rateRepository.find({
+			where: {
+				from: In(exchanges.map((exchange) => exchange.from)),
+				to: In(exchanges.map((exchange) => exchange.to)),
+			},
+		});
+		if (rates.length) {
+			const exchangesWithRate = exchanges.map((exchange) => {
+				const currentDate = new Date(exchange.date).getTime();
+				const preparedRates = rates.filter(
+					(rateItem) => rateItem.from === exchange.from && rateItem.to === exchange.to
+				);
+				if (preparedRates.length) {
+					const closestRate = preparedRates.reduce((closest, currentItem) => {
+						const timeDifference = Math.abs(new Date(currentItem.date).getTime() - currentDate);
+						return timeDifference < Math.abs(new Date(closest.date).getTime() - currentDate) ? currentItem : closest;
+					}, preparedRates[0]);
+					return {
+						...exchange,
+						rate: closestRate,
+					};
+				}
+				return {};
+			});
+			await this.saveEntity(
+				exchangesWithRate.filter((item) => !!Object.keys(item).length),
+				"exchangeRepository"
+			);
+		}
+	}
+
 	async saveDataToDB(data: NonNullable<unknown>): Promise<void> {
 		const exchangeOffices = data["exchange-offices"];
 		const { countries } = data as {
@@ -86,11 +115,9 @@ export class ExchangeOfficeService {
 		};
 		await this.saveUniqueDataByField(countries, "countryRepository", "code");
 		await this.saveUniqueDataByField(exchangeOffices, "exchangeOfficeRepository", "id", true);
-		const [exchanges, rates] = await Promise.all(
-			["exchanges", "rates"].map((fieldName) => this.prepareDataWithExchangeOffice(exchangeOffices, fieldName))
-		);
-		await Promise.all(
-			[exchanges, rates].map((item, index) => this.saveEntity(item, ["exchangeRepository", "rateRepository"][index]))
-		);
+		const preparedRates = await this.prepareDataWithExchangeOffice<Rate>(exchangeOffices, "rates");
+		const preparedExchanges = await this.prepareDataWithExchangeOffice<Exchange>(exchangeOffices, "exchanges");
+		await this.saveEntity(preparedRates, "rateRepository");
+		await this.findCorrespondingRateAndSaveExchange(preparedExchanges);
 	}
 }
