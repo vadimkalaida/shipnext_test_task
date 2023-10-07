@@ -94,8 +94,10 @@ export class ExchangeOfficeService {
 						const timeDifference = Math.abs(new Date(currentItem.date).getTime() - currentDate);
 						return timeDifference < Math.abs(new Date(closest.date).getTime() - currentDate) ? currentItem : closest;
 					}, preparedRates[0]);
+					const calculatedBid: number = +exchange.bid || +exchange.ask / (+closestRate.out / +closestRate.in);
 					return {
 						...exchange,
+						bid: calculatedBid,
 						rate: closestRate,
 					};
 				}
@@ -115,8 +117,10 @@ export class ExchangeOfficeService {
 		};
 		await this.saveUniqueDataByField(countries, "countryRepository", "code");
 		await this.saveUniqueDataByField(exchangeOffices, "exchangeOfficeRepository", "id", true);
-		const preparedRates = await this.prepareDataWithExchangeOffice<Rate>(exchangeOffices, "rates");
-		const preparedExchanges = await this.prepareDataWithExchangeOffice<Exchange>(exchangeOffices, "exchanges");
+		const [preparedRates, preparedExchanges] = await Promise.all([
+			this.prepareDataWithExchangeOffice<Rate>(exchangeOffices, "rates"),
+			this.prepareDataWithExchangeOffice<Exchange>(exchangeOffices, "exchanges"),
+		]);
 		await this.saveEntity(preparedRates, "rateRepository");
 		await this.findCorrespondingRateAndSaveExchange(preparedExchanges);
 	}

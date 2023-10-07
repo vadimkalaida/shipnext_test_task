@@ -16,7 +16,7 @@ export class Exchange {
 	@Column({ type: "real" })
 	ask: string;
 
-	@Column({ nullable: true, type: "real" })
+	@Column({ type: "real" })
 	bid: string;
 
 	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
