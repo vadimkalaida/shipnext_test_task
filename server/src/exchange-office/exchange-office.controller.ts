@@ -21,7 +21,7 @@ export class ExchangeOfficeController {
 			const preparedFileString = await this.fileService.uploadFile(file.path);
 			const parsed = this.parseService.parse(preparedFileString);
 			await this.exchangeOfficeService.saveDataToDB(parsed);
-			console.log(parsed, "parsed");
+			return parsed;
 		} catch (e) {
 			console.error(e);
 			throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -31,7 +31,7 @@ export class ExchangeOfficeController {
 	@Get("top-currency-exchangers")
 	async getTop3CurrencyExchangers() {
 		try {
-			await this.exchangeOfficeService.getTopCurrencyExchangers();
+			return await this.exchangeOfficeService.getTopCurrencyExchangers();
 		} catch (e) {
 			console.error(e);
 			throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);

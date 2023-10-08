@@ -96,6 +96,11 @@ exchange-offices
         to = CAD
         ask = 2870
         date = 2023-10-05 19:25:33
+      exchange
+        from = AUD
+        to = CAD
+        ask = 870
+        date = 2023-08-05 19:25:33
     rates
       rate
         from = AUD

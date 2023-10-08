@@ -12,6 +12,8 @@ import {
 
 @Injectable()
 export class ExchangeOfficeService {
+	readonly BASE_CURRENCY = "USD";
+
 	constructor(
 		@InjectRepository(ExchangeOffice) private readonly exchangeOfficeRepository: Repository<ExchangeOffice>,
 		@InjectRepository(Exchange) private readonly exchangeRepository: Repository<Exchange>,
@@ -81,7 +83,7 @@ export class ExchangeOfficeService {
 	}
 
 	getUSDCurrency(rateFromVal: string, rates: Rate[]): number {
-		const usdRate = rates.find((rate) => rate.from === rateFromVal && rate.to === "USD");
+		const usdRate = rates.find((rate) => rate.from === rateFromVal && rate.to === this.BASE_CURRENCY);
 		if (usdRate) {
 			return +usdRate.out / +usdRate.in;
 		}
@@ -112,16 +114,14 @@ export class ExchangeOfficeService {
 							? currentItem
 							: closest;
 					}, preparedRates[0]);
-					const usdCurrency = this.getUSDCurrency(exchange.to !== "USD" ? exchange.to : exchange.from, sortedRates);
+					const usdCurrency = this.getUSDCurrency(
+						exchange.to !== this.BASE_CURRENCY ? exchange.to : exchange.from,
+						sortedRates
+					);
 					const calculatedBid: number = +exchange.bid || +exchange.ask / (+closestRate.out / +closestRate.in);
-					const preparedAsk = closestRate.from === "USD" ? +exchange.ask * usdCurrency : +exchange.ask;
-					const preparedBid = closestRate.from === "USD" ? calculatedBid : calculatedBid * usdCurrency;
+					const preparedAsk = closestRate.from === this.BASE_CURRENCY ? +exchange.ask * usdCurrency : +exchange.ask;
+					const preparedBid = closestRate.from === this.BASE_CURRENCY ? calculatedBid : calculatedBid * usdCurrency;
 					const exchangeProfit = Math.abs(preparedAsk - preparedBid);
-					console.log(exchange, "current exchange");
-					console.log(usdCurrency, "usdCurrency");
-					console.log(preparedAsk, "preparedAsk", exchange.ask, "exchange.ask");
-					console.log(preparedBid, "preparedBid", calculatedBid, "calculatedBid");
-					console.log(exchangeProfit, "exchangeProfit");
 					return {
 						...exchange,
 						bid: calculatedBid,
@@ -234,9 +234,6 @@ export class ExchangeOfficeService {
 			ORDER BY rc.countryTotalProfit DESC, reo.officeRank;
 		`;
 		const foundExchangeOfficesForTheLastMonth = await this.exchangeOfficeRepository.query(sql, [lastMonthDate]);
-		const preparedData = this.prepareExchangeOfficesToReturn(foundExchangeOfficesForTheLastMonth);
-		console.log(foundExchangeOfficesForTheLastMonth, "foundExchangeOfficesForTheLastMonth");
-		console.log(preparedData, "preparedData");
-		console.log(preparedData[0].exchangeOffices, "preparedData[0].exchangeOffices");
+		return this.prepareExchangeOfficesToReturn(foundExchangeOfficesForTheLastMonth);
 	}
 }
