@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, In, MoreThanOrEqual } from "typeorm";
-import { ExchangeOffice } from "./entities/exchange-office.entity";
-import { Exchange } from "./entities/exchange.entity";
-import { Rate } from "./entities/rate.entity";
-import { Country } from "./entities/country.entity";
+import {
+	ExchangeOffice,
+	Exchange,
+	Rate,
+	Country,
+	ExchangeOfficeTopCurrencyExchangers,
+	IExchangeOfficeTopCurrencyExchangersResponse,
+} from "./exchange-office.types";
 
 @Injectable()
 export class ExchangeOfficeService {
@@ -149,20 +153,90 @@ export class ExchangeOfficeService {
 		await this.findCorrespondingRateAndSaveExchange(preparedExchanges);
 	}
 
+	prepareExchangeOfficesToReturn(
+		foundExchangeOffices: ExchangeOfficeTopCurrencyExchangers[]
+	): IExchangeOfficeTopCurrencyExchangersResponse[] {
+		const prepared = foundExchangeOffices.reduce((obj, exchangeOfficeItem) => {
+			const { countrycode, countryname, countrytotalprofit, ...rest } = exchangeOfficeItem;
+			const foundCountry = obj[countrycode];
+			if (foundCountry) {
+				obj[countrycode] = {
+					...foundCountry,
+					exchangeOffices: [...foundCountry.exchangeOffices, { ...rest }],
+				};
+			} else {
+				obj[countrycode] = {
+					name: countryname,
+					countryTotalProfit: countrytotalprofit,
+					code: countrycode,
+					exchangeOffices: [{ ...rest }],
+				};
+			}
+			return obj;
+		}, {});
+		return Object.values(prepared);
+	}
+
 	async getTopCurrencyExchangers() {
-		const currentDate = new Date();
-		currentDate.setMonth(currentDate.getMonth() - 1);
-		const foundExchangeOfficesForTheLastMonth = await this.exchangeOfficeRepository.find({
-			relations: ["exchanges", "rates", "country"],
-			where: {
-				exchanges: {
-					date: MoreThanOrEqual(currentDate),
-				},
-				rates: {
-					date: MoreThanOrEqual(currentDate),
-				},
-			},
-		});
+		const lastMonthDate = new Date();
+		lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+		const sql = `
+			WITH RankedExchangeOffices AS (
+				SELECT
+					eo.*,
+					json_agg(json_build_object(
+						'id', e.id,
+						'from', e.from,
+						'to', e.to,
+						'ask', e.ask,
+						'bid', e.bid,
+						'date', e.date,
+						'profit', e.profit
+						)) AS exchanges,
+					json_agg(json_build_object(
+						'id', r.id,
+						'from', r.from,
+						'to', r.to,
+						'in', r.in,
+						'out', r.out,
+						'reserve', r.reserve,
+						'date', r.date
+						)) AS rates,
+				    c.name AS countryName,
+					SUM(e.profit) AS totalProfit,
+					ROW_NUMBER() OVER (PARTITION BY eo.country ORDER BY SUM(e.profit) DESC) AS officeRank
+				FROM exchange_office eo
+				LEFT JOIN exchange e ON eo.id = e."exchangeOfficeId"
+				LEFT JOIN rate r ON e."rateId" = r.id
+				LEFT JOIN country c ON eo.country = c.code
+				WHERE e.date >= $1
+				GROUP BY eo.id, eo.country, c.name
+			),
+			 RankedCountries AS (
+				 SELECT
+					 eo.country AS country,
+					 SUM(eo.totalProfit) AS countryTotalProfit
+				 FROM RankedExchangeOffices eo
+				 GROUP BY eo.country
+			 )
+			SELECT
+				reo.id,
+				reo.name,
+				reo.country as countryCode,
+				reo.countryName,
+				reo.exchanges,
+				reo.rates,
+				reo.totalProfit,
+				rc.countryTotalProfit
+			FROM RankedExchangeOffices reo
+						 JOIN RankedCountries rc ON reo.country = rc.country
+			WHERE reo.officeRank <= 3
+			ORDER BY rc.countryTotalProfit DESC, reo.officeRank;
+		`;
+		const foundExchangeOfficesForTheLastMonth = await this.exchangeOfficeRepository.query(sql, [lastMonthDate]);
+		const preparedData = this.prepareExchangeOfficesToReturn(foundExchangeOfficesForTheLastMonth);
 		console.log(foundExchangeOfficesForTheLastMonth, "foundExchangeOfficesForTheLastMonth");
+		console.log(preparedData, "preparedData");
+		console.log(preparedData[0].exchangeOffices, "preparedData[0].exchangeOffices");
 	}
 }

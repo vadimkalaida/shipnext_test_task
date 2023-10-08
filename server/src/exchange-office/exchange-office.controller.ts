@@ -1,4 +1,4 @@
-import {Controller, Get, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors} from "@nestjs/common";
+import { Controller, Get, HttpException, HttpStatus, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Express } from "express";
 import { ExchangeOfficeService } from "./exchange-office.service";

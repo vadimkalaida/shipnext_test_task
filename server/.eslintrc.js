@@ -31,6 +31,7 @@ module.exports = {
     "no-useless-constructor": 0,
     "no-empty-function": 0,
     "class-methods-use-this": 0,
+    "no-param-reassign": 0,
     "prefer-destructuring": [
       "error",
       {
