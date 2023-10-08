@@ -1,3 +1,5 @@
+<strong>[Demonstration of how everything works.mp4](Demonstration%20of%20how%20everything%20works.mp4)</strong>
+
 Questions
 // Write down your answers in the README.md file at the root of your project folder.
 
