@@ -1,6 +1,14 @@
-<strong>[Demonstration of how everything works.mp4](Demonstration%20of%20how%20everything%20works.mp4)</strong>
+<h1>All four question answers are below images!!!!!</h1>
 
-Questions
+Uploading and parsing file:
+
+![POST_upload-file.png](POST_upload-file.png)
+
+Getting top exchange-offices by countries:
+
+![GET_top-currency-exchangers.png](GET_top-currency-exchangers.png)
+
+<h2>Questions</h2>
 // Write down your answers in the README.md file at the root of your project folder.
 
 1. How to change the code to support different file format versions?
@@ -31,9 +39,9 @@ If we don't want to insert this data into a database. If we just want to use onl
 
 **Answer:**
 
-1) We can implement caching system. For example, we can use Redis. If the data is cached, we don't need to make a request to the database. We can just get it from the cache. It will speed up the execution of requests.
-2) We can use some kind of queue system. For example, RabbitMQ. We can create a queue for the requests. And then we can process them one by one. It will also speed up the execution of requests.
-3) We can use some kind of batch processing system. We can create a batch for the requests. And then we can process them one by one. It will also speed up the execution of requests.
-4) We can use some kind of cron job. We can create a cron job that will run once a day or even less frequently. And it will process all the requests. It will also speed up the execution of requests.
-5) We can preprocess the data before inserting it into the database. It will contain the data in the format we need. So when client requests this data, no processing is needed. It will also speed up the execution of requests.
-6) We can optimize the queries to request only the specific data we need. It will help us avoiding requesting unnecessary data. It will also speed up the execution of requests.
+- We can implement caching system. For example, we can use Redis. If the data is cached, we don't need to make a request to the database. We can just get it from the cache. It will speed up the execution of requests.
+- We can use some kind of queue system. For example, RabbitMQ. We can create a queue for the requests. And then we can process them one by one. It will also speed up the execution of requests.
+- We can use some kind of batch processing system. We can create a batch for the requests. And then we can process them one by one. It will also speed up the execution of requests.
+- We can use some kind of cron job. We can create a cron job that will run once a day or even less frequently. And it will process all the requests. It will also speed up the execution of requests.
+- We can preprocess the data before inserting it into the database. It will contain the data in the format we need. So when client requests this data, no processing is needed. It will also speed up the execution of requests.
+- We can optimize the queries to request only the specific data we need. It will help us avoiding requesting unnecessary data. It will also speed up the execution of requests.
