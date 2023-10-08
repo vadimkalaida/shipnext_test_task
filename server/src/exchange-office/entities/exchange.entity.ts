@@ -19,6 +19,9 @@ export class Exchange {
 	@Column({ type: "real" })
 	bid: string;
 
+	@Column({ nullable: true, type: "real", default: 0 })
+	profit: string;
+
 	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
 	date: Date;
 

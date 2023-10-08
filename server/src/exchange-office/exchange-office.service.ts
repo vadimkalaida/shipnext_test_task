@@ -112,14 +112,17 @@ export class ExchangeOfficeService {
 					const calculatedBid: number = +exchange.bid || +exchange.ask / (+closestRate.out / +closestRate.in);
 					const preparedAsk = closestRate.from === "USD" ? +exchange.ask * usdCurrency : +exchange.ask;
 					const preparedBid = closestRate.from === "USD" ? calculatedBid : calculatedBid * usdCurrency;
+					const exchangeProfit = Math.abs(preparedAsk - preparedBid);
 					console.log(exchange, "current exchange");
 					console.log(usdCurrency, "usdCurrency");
 					console.log(preparedAsk, "preparedAsk", exchange.ask, "exchange.ask");
 					console.log(preparedBid, "preparedBid", calculatedBid, "calculatedBid");
+					console.log(exchangeProfit, "exchangeProfit");
 					return {
 						...exchange,
 						bid: calculatedBid,
 						rate: closestRate,
+						profit: exchangeProfit,
 					};
 				}
 				return {};
