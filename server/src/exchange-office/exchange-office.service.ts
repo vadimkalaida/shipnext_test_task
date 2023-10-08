@@ -153,6 +153,8 @@ export class ExchangeOfficeService {
 		await this.findCorrespondingRateAndSaveExchange(preparedExchanges);
 	}
 
+	// Task 2 - Top 3 currency exchangers
+
 	prepareExchangeOfficesToReturn(
 		foundExchangeOffices: ExchangeOfficeTopCurrencyExchangers[]
 	): IExchangeOfficeTopCurrencyExchangersResponse[] {
