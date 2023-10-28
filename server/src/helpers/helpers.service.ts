@@ -1,4 +1,7 @@
-export class TextService {
+import { Injectable } from "@nestjs/common";
+
+@Injectable()
+export class HelpersService {
 	static checkIfContainsOneOfSymbols(text: string, symbols: string[]): boolean {
 		return text && symbols.some((symbol) => text.includes(symbol));
 	}

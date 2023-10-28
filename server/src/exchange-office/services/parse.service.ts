@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { TextService } from "../../global-services/text.service";
+import { HelpersService } from "../../helpers/helpers.service";
 
 interface IStringWithNumberOfTabs {
 	value: string;
@@ -17,13 +17,16 @@ export class ParseService {
 		nextString: IStringWithNumberOfTabs
 	): Record<string, any> {
 		const resultCopy = { ...res };
-		const isNextStringContainsDivider = TextService.checkIfContainsOneOfSymbols(
+		const isNextStringContainsDivider = HelpersService.checkIfContainsOneOfSymbols(
 			nextString.value,
 			this.KEY_VALUE_DIVIDERS
 		);
 		if (
 			isNextStringContainsDivider &&
-			!TextService.checkIfContainsOneOfSymbols(prevString?.value || this.KEY_VALUE_DIVIDERS[0], this.KEY_VALUE_DIVIDERS)
+			!HelpersService.checkIfContainsOneOfSymbols(
+				prevString?.value || this.KEY_VALUE_DIVIDERS[0],
+				this.KEY_VALUE_DIVIDERS
+			)
 		) {
 			resultCopy[prevString.value] = [];
 		} else if (!isNextStringContainsDivider) {
@@ -41,7 +44,7 @@ export class ParseService {
 			const currentString = stringsWithTabsCopy[i];
 			const nextString = stringsWithTabsCopy[i + 1];
 			if (currentString && currentString.tabs >= tabs) {
-				const isCurrenStringContainsDivider = TextService.checkIfContainsOneOfSymbols(
+				const isCurrenStringContainsDivider = HelpersService.checkIfContainsOneOfSymbols(
 					currentString.value,
 					this.KEY_VALUE_DIVIDERS
 				);
@@ -72,7 +75,7 @@ export class ParseService {
 					i = 0;
 				}
 				if (isCurrenStringContainsDivider) {
-					const splitValueArr = TextService.splitTextByOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
+					const splitValueArr = HelpersService.splitTextByOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
 					res[splitValueArr[0].trim()] = splitValueArr[1].trim();
 				}
 			} else {

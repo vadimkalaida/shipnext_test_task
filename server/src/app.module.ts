@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
 import { ExchangeOfficeModule } from "./exchange-office/exchange-office.module";
+import { HelpersService } from './helpers/helpers.service';
 
 @Module({
 	imports: [
@@ -27,6 +28,6 @@ import { ExchangeOfficeModule } from "./exchange-office/exchange-office.module";
 		}),
 	],
 	controllers: [],
-	providers: [],
+	providers: [HelpersService],
 })
 export class AppModule {}
