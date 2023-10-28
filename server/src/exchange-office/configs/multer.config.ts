@@ -1,10 +1,12 @@
 import { diskStorage } from "multer";
 import { Express, Request } from "express";
-import { ReadFileService } from "../services/read-file.service";
+import { FileService } from "../services/file.service";
+
+const NOT_FILE_PROPERTY_NAMES = ["constructor", "uploadFile"];
 
 const returnFileMulterConfig = () => {
-	const fileMethodNames = Object.getOwnPropertyNames(ReadFileService.prototype).filter(
-		(propertyName) => propertyName !== "constructor"
+	const fileMethodNames = Object.getOwnPropertyNames(FileService.prototype).filter(
+		(propertyName) => !NOT_FILE_PROPERTY_NAMES.includes(propertyName)
 	);
 	const regexPattern = new RegExp(`\\.(${fileMethodNames.join("|")})$`);
 	return {

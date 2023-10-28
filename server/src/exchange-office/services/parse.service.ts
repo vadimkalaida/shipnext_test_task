@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { HelpersService } from "../../helpers/helpers.service";
+import { splitTextByOneOfSymbols } from "../../helpers/splitTextByOneOfSymbols";
+import { checkIfContainsOneOfSymbols } from "../../helpers/checkIfContainsOneOfSymbols";
 
 interface IStringWithNumberOfTabs {
 	value: string;
@@ -17,16 +18,10 @@ export class ParseService {
 		nextString: IStringWithNumberOfTabs
 	): Record<string, any> {
 		const resultCopy = { ...res };
-		const isNextStringContainsDivider = HelpersService.checkIfContainsOneOfSymbols(
-			nextString.value,
-			this.KEY_VALUE_DIVIDERS
-		);
+		const isNextStringContainsDivider = checkIfContainsOneOfSymbols(nextString.value, this.KEY_VALUE_DIVIDERS);
 		if (
 			isNextStringContainsDivider &&
-			!HelpersService.checkIfContainsOneOfSymbols(
-				prevString?.value || this.KEY_VALUE_DIVIDERS[0],
-				this.KEY_VALUE_DIVIDERS
-			)
+			!checkIfContainsOneOfSymbols(prevString?.value || this.KEY_VALUE_DIVIDERS[0], this.KEY_VALUE_DIVIDERS)
 		) {
 			resultCopy[prevString.value] = [];
 		} else if (!isNextStringContainsDivider) {
@@ -44,10 +39,7 @@ export class ParseService {
 			const currentString = stringsWithTabsCopy[i];
 			const nextString = stringsWithTabsCopy[i + 1];
 			if (currentString && currentString.tabs >= tabs) {
-				const isCurrenStringContainsDivider = HelpersService.checkIfContainsOneOfSymbols(
-					currentString.value,
-					this.KEY_VALUE_DIVIDERS
-				);
+				const isCurrenStringContainsDivider = checkIfContainsOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
 				if (!isCurrenStringContainsDivider && nextString && !Array.isArray(res[prevString?.value])) {
 					res = this.returnResultWithArray(res, currentString, prevString, nextString);
 				}
@@ -75,7 +67,7 @@ export class ParseService {
 					i = 0;
 				}
 				if (isCurrenStringContainsDivider) {
-					const splitValueArr = HelpersService.splitTextByOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
+					const splitValueArr = splitTextByOneOfSymbols(currentString.value, this.KEY_VALUE_DIVIDERS);
 					res[splitValueArr[0].trim()] = splitValueArr[1].trim();
 				}
 			} else {
