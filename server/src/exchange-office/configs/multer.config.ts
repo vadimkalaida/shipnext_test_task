@@ -1,4 +1,3 @@
-import { diskStorage } from "multer";
 import { Express, Request } from "express";
 import { FileService } from "../services/file.service";
 
@@ -10,16 +9,6 @@ const returnFileMulterConfig = () => {
 	);
 	const regexPattern = new RegExp(`\\.(${fileMethodNames.join("|")})$`);
 	return {
-		storage: diskStorage({
-			destination: "./uploads",
-			filename: (
-				req: Request,
-				file: Express.Multer.File,
-				callback: (error: Error | null, fileName: string) => void
-			) => {
-				return callback(null, file.originalname);
-			},
-		}),
 		fileFilter(req: Request, file: Express.Multer.File, callback: (error: Error | null, acceptFile: boolean) => void) {
 			if (!file.originalname.match(regexPattern)) {
 				return callback(new Error("Only text files are allowed!"), false);

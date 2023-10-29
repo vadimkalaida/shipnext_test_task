@@ -18,7 +18,7 @@ export class ExchangeOfficeController {
 	@UseInterceptors(FileInterceptor("file", fileMulterConfig))
 	async uploadFile(@UploadedFile() file: Express.Multer.File) {
 		try {
-			const preparedFileString = await this.fileService.uploadFile(file.path);
+			const preparedFileString = await this.fileService.uploadFile(file);
 			const parsed = this.parseService.parse(preparedFileString);
 			await this.exchangeOfficeService.saveDataToDB(parsed);
 			return parsed;

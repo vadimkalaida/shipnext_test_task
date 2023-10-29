@@ -1,18 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import { join, extname } from "path";
-import { readFile } from "fs/promises";
+import { extname } from "path";
+import { Express } from "express";
 
 @Injectable()
 export class FileService {
 	constructor() {}
 
-	async uploadFile(filePath: string): Promise<string> {
-		const fileExtension = extname(filePath).replace(".", "");
-		const preparedFilePath = join(__dirname, "..", "..", "..", filePath);
-		return this[fileExtension](preparedFilePath);
+	async uploadFile(file: Express.Multer.File): Promise<string> {
+		const fileExtension = extname(file.originalname).replace(".", "");
+		return this[fileExtension](file.buffer);
 	}
 
-	async txt(filePath: string): Promise<string> {
-		return readFile(filePath, "utf-8");
+	async txt(buffer: Buffer): Promise<string> {
+		return buffer.toString("utf-8");
 	}
 }
